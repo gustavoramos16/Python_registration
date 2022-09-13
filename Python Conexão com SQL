@@ -1,0 +1,500 @@
+import mysql.connector
+from prettytable import PrettyTable
+tabela_disciplinas = PrettyTable(['Codigo das Disciplinas', 'Nome das disciplinas'])
+tabela_professores = PrettyTable(['Registro', 'Nome do professor', 'telefone do professor', 'idade do professor', 'salario do professor'])
+tabela_disciplinas_professores = PrettyTable(['Codigo disciplina no curso', 'Codigo da disciplina', 'Codigo professor', 'Curso', 'Carga horaria', 'Ano letivo'])
+
+def mostrar_conexao():
+    try:
+        global conexao
+        conexao = mysql.connector.Connect(host='127.0.0.1', database='univap', user='root', password='1234')
+        if conexao.is_connected():
+            global cmdsql
+            cmdsql = conexao.cursor()
+            banco_info = conexao.get_server_info()
+            cmdsql.execute('select database();')
+            banco_name = cmdsql.fetchone()
+            print("Conectado ao servidor database!!!")
+            print(f'Conectado ao banco de dados : {banco_name}')
+            print(f'Servidor = {conexao}')
+            print(f'informações sobre o banco : {banco_info}')
+           
+            
+          
+    except Exception as erro:
+            print(f'Ocorreu um erro! {erro}')
+            
+def linha():
+    print("-=" * 80)
+
+def mostrar_tabela():
+    try:
+        cmdsql = conexao.cursor()
+        
+        linha()
+
+        print("[0] - Mostrar Todas")
+        print("[1] - Mostrar Disciplinas")
+        print("[2] - Mostrar Professores")
+        print("[3] - Mostrar Disciplinas x professores")
+        
+        linha()
+        
+        a = int(input("Qual tabela deseja verificar? : ")) 
+        
+        
+        if a == 0:
+
+            cmdsql.execute(f'select * from disciplinas;')
+            tabela = cmdsql.fetchall()
+            tabela_disciplinas.clear_rows()
+
+            if cmdsql.rowcount > 0:
+                
+                for registro in tabela:
+                    
+                    tabela_disciplinas.add_row([registro[0], registro[1]])
+            print(tabela_disciplinas)
+            
+            conexao.commit()
+            
+            cmdsql.execute(f'select * from professores;')
+            tabela = cmdsql.fetchall()
+            tabela_professores.clear_rows()
+
+            if cmdsql.rowcount > 0:
+                
+                for registro in tabela:
+                    
+                    tabela_professores.add_row([registro[0], registro[1], registro[2], registro [3], registro[4]])
+            print(tabela_professores)
+
+            conexao.commit()
+
+            cmdsql.execute(f'select * from disciplinasxprofessores;')
+            tabela = cmdsql.fetchall()
+            tabela_disciplinas_professores.clear_rows()
+
+            if cmdsql.rowcount > 0:
+                
+                for registro in tabela:
+                    
+                    tabela_disciplinas_professores.add_row([registro[0], registro[1], registro[2], registro[3], registro[4], registro[5]])
+            print(tabela_disciplinas_professores)
+            
+            conexao.commit()
+
+        if a == 1:
+            
+            cmdsql.execute(f'select * from disciplinas;')
+            tabela = cmdsql.fetchall()
+            tabela_disciplinas.clear_rows()
+
+            if cmdsql.rowcount > 0:
+                
+                for registro in tabela:
+                    
+                    tabela_disciplinas.add_row([registro[0], registro[1]])
+            print(tabela_disciplinas)
+            
+            conexao.commit()
+            
+        if a == 2:
+            cmdsql.execute(f'select * from professores;')
+            tabela = cmdsql.fetchall()
+            tabela_professores.clear_rows()
+
+            if cmdsql.rowcount > 0:
+
+                for registro in tabela:
+                    
+                    tabela_professores.add_row([registro[0], registro[1], registro[2], registro [3], registro[4]])
+            print(tabela_professores)
+
+            conexao.commit()
+            
+        if a == 3:
+            cmdsql.execute(f'select * from disciplinasxprofessores;')
+            tabela = cmdsql.fetchall()
+            tabela_disciplinas_professores.clear_rows()
+
+            if cmdsql.rowcount > 0:
+                
+                for registro in tabela:
+                    
+                    tabela_disciplinas_professores.add_row([registro[0], registro[1], registro[2], registro[3], registro[4], registro[5]])
+            print(tabela_disciplinas_professores)
+            
+            conexao.commit()
+
+    except Exception as erro:
+        print(f'Ocorreu um erro ao vizualizar a disciplina : {erro}')
+
+def adicionar_tabela():      
+    try:
+        cmdsql = conexao.cursor()
+        
+        linha()
+        
+        print("[1] - Adicionar à tabela disciplinas")
+        print("[2] - Adicionar à tabela professores")
+        print("[3] - Adicionar à tabela disciplinas x professores")
+        
+        linha()
+        
+        a = int(input("Em qual tabela deseja adicionar? : "))
+
+        if a > 3 :
+            print("Digite um valor válido para a tabela")
+        
+        linha()
+        
+        if a == 1:
+            
+            codigo_disciplina = int(input("Código da Disciplina:"))
+            nome_disciplina = input("Nome da disciplina:")
+            cmdsql.execute(f'insert into disciplinas(codigodisc, nomedisc) values ({codigo_disciplina}, "{nome_disciplina}") ;')
+            conexao.commit()
+            print("Adicionado com sucesso!!")
+            
+        elif a == 2:
+
+            codigo_professores = int(input("Código professor : "))
+            nome_professor = input("Nome do professor : ")
+            telefone_professor = input("Telefone do professor : ").strip()
+            idade_prof = int(input("Idade do professor : "))
+            salario_prof = float(input("salarioprof : "))
+            cmdsql.execute(f'insert into professores(registro, nomeprof, telefoneprof, idadeprof, salarioprof) values ({codigo_professores}, "{nome_professor}", {telefone_professor}, {idade_prof}, {salario_prof}) ;')
+            conexao.commit()
+            print("Adicionado com sucesso!!")
+            
+        elif a == 3:
+            
+            codigo_disciplina_no_curso = input("Código disciplina no curso:")
+            coddisciplina = int(input("Código da disciplina:"))
+            codprofessor = int(input("Código do professor:"))
+            curso = input("Nome do curso: ")
+            cargahoraria = int(input("Carga horária do curso:"))
+            ano_letivo = int(input("Ano letivo do curso:"))    
+            cmdsql.execute(f'insert into disciplinasxprofessores(codigodisciplinanocurso, coddisciplina, codprofessor, curso, cargahoraria, anoletivo) values({codigo_disciplina_no_curso}, {coddisciplina}, {codprofessor}, "{curso}", {cargahoraria}, {ano_letivo});')
+            conexao.commit()
+            print("Adicionado com sucesso!!")
+            
+        linha()  
+                
+    except Exception as erro:
+        print(f'Ocorreu um erro ao cadastrar a disciplina : {erro}')
+        
+        
+def alterar_tabela():     
+    try:        
+        cmdsql = conexao.cursor()
+        
+        linha()
+        
+        print("[1] - Modificar a tabela disciplinas")
+        print("[2] - Modificar a tabela professores")
+        print("[3] - Modificar tabela disciplinas x professores")
+        
+        linha()
+        
+        a = int(input("Em qual tabela deseja alterar? : "))
+        
+        if a == 1:
+            
+            codigo_disciplina = int(input("Digite o código da disciplina: "))
+            cmdsql.execute(f'select * from disciplinas where codigodisc = {codigo_disciplina};')
+            
+            tabela = cmdsql.fetchall()
+            
+            if cmdsql.rowcount > 0:
+                
+                for r in tabela: 
+                    tabela_disciplinas.clear_rows()
+                    tabela_disciplinas.add_row([r[0], r[1]])
+                print(tabela_disciplinas)
+                print(f'Nome da disciplina : {r[1]}')
+                novo_nome_disciplina = input("Novo nome da disciplina:")
+                cmdsql.execute(f'update disciplinas SET nomedisc = "{novo_nome_disciplina}" where codigodisc = {codigo_disciplina};')
+                conexao.commit()
+                print("Nome da disciplina alterada com sucesso!!")
+            else:
+                print("Nenhum valor inserido para alteração!!")
+                
+        elif a == 2:
+            
+            
+            codigo_professor = int(input("Digite o código do registro: "))
+
+            cmdsql.execute(f'select * from professores where registro = {codigo_professor};')    
+
+            tabela = cmdsql.fetchall()
+       
+            if cmdsql.rowcount > 0:
+  
+                for r in tabela:
+                    tabela_professores.clear_rows()
+                    tabela_professores.add_row([r[0], r[1], r[2], r[3], r[4]])
+                    print(tabela_professores)
+                    b = input(f'Selecione um atributo para alterar: [nome] [telefone] [idade] [salario] : ').strip().lower()
+                    
+                    if b == 'nome':
+                        
+                        print(f'Nome do professor : {r[1]}')
+                        novo_nome_professor = input("Novo nome do professor : ").strip().lower()
+                        cmdsql.execute(f'update professores set nomeprof = "{novo_nome_professor}" where registro = {codigo_professor};')
+                        conexao.commit()
+                        print("Nome do professor alterado com sucesso!!")
+                        
+                    elif b == 'telefone':
+                        print(f'Telefone do professor : {r[2]}')
+                        novo_telefone_professor = int(input("Novo telefone professor : "))
+                        cmdsql.execute(f'update professores set telefoneprof = {novo_telefone_professor} where registro = {codigo_professor};')
+                        conexao.commit()
+                        print("Telefone do professor alterado com sucesso!!")
+                        
+                        
+                    elif b == 'idade':
+                        print(f'Idade do professor : {r[3]}')
+                        nova_idade_professor = int(input("Nova idade professor : "))
+                        cmdsql.execute(f'update professores set idadeprof = {nova_idade_professor} where registro = {codigo_professor};')
+                        conexao.commit()
+                        print("Idade do professor alterada com sucesso!!")
+                        
+                    elif b == 'salario':
+                        print(f'Salário professor : {r[4]}')
+                        novo_salario_professor = int(input("Novo salario professor : "))
+                        cmdsql.execute(f'update professores set salarioprof = {novo_salario_professor} where registro = {codigo_professor};')
+                        conexao.commit()
+                        print("Salário do professor alterado com sucesso!!")
+                        
+                    else:
+                        
+                        print("Valor digitado não é um campo válido!!")
+  
+            else:
+                print("Nenhum valor inserido para alteração!!")
+
+                
+        elif a == 3:
+            
+            codigo_disciplina_professor = int(input("Digite o código da disciplina no curso: "))
+            cmdsql.execute(f'select * from disciplinasxprofessores where codigodisciplinanocurso = {codigo_disciplina_professor}')
+            
+            tabela = cmdsql.fetchall()
+            if cmdsql.rowcount > 0:
+                for r in tabela: 
+                    tabela_disciplinas_professores.clear_rows() 
+                    tabela_disciplinas_professores.add_row([r[0], r[1], r[2], r[3], r[4], r[5]])    
+                    print(tabela_disciplinas_professores)
+                    c = input(f'Selecione um atributo para alterar : [curso] [carga_horária] [ano_letivo]').strip().lower()
+                    
+                    if c == 'curso':
+                    
+                        print(f'Nome do curso : {r[3]}')
+                        novo_nome_curso = input(f'Novo nome do curso : ').strip().lower()
+                        cmdsql.execute(f'update disciplinasxprofessores set curso = "{novo_nome_curso}" where codigodisciplinanocurso = {codigo_disciplina_professor};')
+                        conexao.commit()
+                        print("Nome do curso alterado com sucesso!!")
+                        
+                    elif c == 'cargahoraria' or c == 'carga horaria' or c == 'carga horária': 
+                        
+                        print(f'Carga horaria do curso : {r[4]}')
+                        nova_carga_horaria = int(input(f'Nova carga horaria do curso:'))
+                        cmdsql.execute(f'update disciplinasxprofessores set cargahoraria = {nova_carga_horaria} where codigodisciplinanocurso = {codigo_disciplina_professor};')
+                        conexao.commit()
+                        print("Carga horária alterada com sucesso!!")
+                        
+                    elif c == 'anoletivo' or c == 'ano letivo':
+                        
+                        print(f'Ano letivo do curso: {r[5]}')
+                        novo_ano_letivo = int(input(f'Novo ano letivo:'))
+                        cmdsql.execute(f'update disciplinasxprofessores set anoletivo = {novo_ano_letivo} where codigodisciplinanocurso = {codigo_disciplina_professor};')
+                        conexao.commit()
+                        print("Ano letivo alterado com sucesso!!")
+                        
+                    else:
+                        
+                        print("Valor digitado não é um campo válido!!")
+                    
+            else:
+                
+                print("Nenhum valor inserido para alteração!!")
+                
+        else : 
+            
+            print("O valor não pertence a nenhuma tabela válida!!")
+            
+    except Exception as erro:
+        print(f'Ocorreu um erro ao alterar a disciplina : {erro}')
+        
+def deletar_tabela():
+    try:
+        cmdsql = conexao.cursor()
+        
+        print("[1] - Excluir da tabela disciplinas")
+        print("[2] - Excluir da tabela professores")
+        print("[3] - Excluir da tabela disciplinas x professores")
+
+        linha()
+        
+        c = int(input("Em qual tabela deseja excluir? : "))
+        
+        if c == 1:
+            
+            codigo_disciplina = int(input("Digite o código da disciplina : "))
+            cmdsql.execute(f'select * from disciplinas where codigodisc = {codigo_disciplina};')
+            tabela = cmdsql.fetchall()
+            
+            if cmdsql.rowcount > 0:
+                tabela_disciplinas.clear_rows() 
+                for r in tabela: 
+                    tabela_disciplinas.add_row([r[0], r[1]])
+                print(tabela_disciplinas)
+                    
+                print(f'Nome da disciplina : {r[1]}')
+                    
+                x = input("Deseja excluir a disciplina da tabela? [S] - Sim | [N] - Não : ").strip().lower()
+                
+                if  x == "sim" or x == 's':
+                    
+                    cmdsql.execute(f'delete from disciplinas where codigodisc = {codigo_disciplina};')
+                    conexao.commit()
+                    print("Disciplina excluida com sucesso!!")
+                    
+                elif x == 'não' or x == 'nao' or x == 'n':
+                    
+                    print("Exclusão da disciplina cancelada!!")  
+            else:
+                
+                print("Nenhum valor inserido para exclusão!!")
+                
+        if c == 2:
+            
+            codigo_professor = int(input("Digite o código do professor : "))
+            cmdsql.execute(f'select * from professores where registro = {codigo_professor};')
+            tabela = cmdsql.fetchall()
+            
+            if cmdsql.rowcount > 0:
+                tabela_professores.clear_rows()
+                for r in tabela:
+ 
+                    tabela_professores.add_row([r[0], r[1], r[2], r[3], r[4]])
+                print(tabela_professores)
+                    
+                print(f'Nome do professor : {r[1]}')
+                    
+                x = input("Deseja excluir o professor da tabela? [S] - Sim | [N] - Não : ").strip().lower()
+                
+                if x == "sim" or x == 's':
+                    
+                    cmdsql.execute(f'delete from professores where registro = {codigo_professor};')
+                    conexao.commit()
+                    print("Professor excluido com sucesso!!")
+                
+                elif x == 'não' or x == 'nao' or x == 'n':
+                    
+                    print("Exclusão do professor cancelada!!")
+                    
+                else:
+                    
+                    print("Selecione uma opção válida!! [S] - Sim | [N] - Não")
+                    
+            else:
+                
+                print("Nenhum valor inserido para exclusão!!")
+                
+        if c == 3:
+            
+            codigo_disciplina_professores = int(input("Digite o código da disciplina no curso : "))
+            cmdsql.execute(f'select * from disciplinasxprofessores where codigodisciplinanocurso = {codigo_disciplina_professores};')
+            tabela = cmdsql.fetchall()
+            
+            if cmdsql.rowcount > 0:
+                tabela_disciplinas_professores.clear_rows()
+                for r in tabela:
+
+                    tabela_disciplinas_professores.add_row([r[0], r[1], r[2], r[3], r[4], r[5]])
+                print(tabela_disciplinas_professores)
+                    
+                print(f'Nome do curso : {r[3]}')
+                    
+                x = input("Deseja excluir o curso da tabela? [S] - Sim | [N] = Não : ").strip().lower()
+                
+                if x == "sim" or x == "s":
+                    
+                    cmdsql.execute(f'delete from disciplinasxprofessores where codigodisciplinanocurso = {codigo_disciplina_professores};')
+                    conexao.commit()
+                    print("Curso excluido com sucesso!!")
+                    
+                elif x == 'não' or x == 'nao' or x == 'n':
+                    
+                    print("Exclusão do curso cancelada!!")
+                    
+                else:
+                    
+                    print("Selecione uma opção válida!! [S] - Sim | [N] - Não")
+            
+            else: 
+                
+                print("Nenhum valor inserido para exclusão!!")
+    except Exception as erro:
+        print(f'Ocorreu um erro ao excluir a disciplina : {erro}')       
+
+def fechar_conexao():
+    try:
+        conexao.close()
+        cmdsql.close()
+    except Exception as erro:
+        print(f'Ocorreu um erro ao fechar a conexão com o servidor : {erro}')
+
+linha()       
+            
+print("Bem vindo!!")
+
+linha()
+
+mostrar_conexao()
+
+while True:
+
+    linha()
+
+    print("[1] - Adicionar")
+    print("[2] - Alterar")
+    print("[3] - Excluir")
+    print("[4] - Vizualizar") 
+    print("[5] - Sair")
+
+    linha()
+
+    op = input("Qual operação deseja executar no banco de dados? ")
+
+    if op == '1':
+        adicionar_tabela()
+    elif op == '2':
+        alterar_tabela()
+    elif op == '3':
+        deletar_tabela()
+    elif op == '4':
+        mostrar_tabela()
+    elif op == '5':
+        linha()
+        fechar_conexao()
+        print("Fim da Utilização do programa!! até a próxima")
+        break
+    else:
+        print("Digite uma seleção válida!!")
+        
+    linha()
+
+    x = input("Deseja continuar? [S] - Sim | [Other] - Não: ").strip().lower()
+
+    if x == 'sim' or x == 's':
+        continue
+    else:
+        linha()
+        fechar_conexao()
+        print("Fim da Utilização do programa!! até a próxima")
+        break
+        
